@@ -361,7 +361,7 @@ class _TrainingDaysPageState extends State<TrainingDaysPage> {
 class ExercisePage extends StatelessWidget {
   final String dayName;
 
-  const ExercisePage({Key? key, required this.dayName}) : super(key: key);
+  const ExercisePage({super.key, required this.dayName});
 
   void _navigateToAddExercises(BuildContext context, String dayName) {
     Navigator.push(
@@ -394,7 +394,7 @@ class ExercisePage extends StatelessWidget {
 
 class SelectExercisePage extends StatelessWidget {
   final String dayName;
-  SelectExercisePage({Key? key, required this.dayName});
+  SelectExercisePage({super.key, required this.dayName});
 
   final List<String> categories = [
     'Dominante de Rodilla',
