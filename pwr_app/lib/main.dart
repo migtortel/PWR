@@ -30,103 +30,17 @@ class PersonalTrainingApp extends StatelessWidget {
 // Página de Bloques
 
 // Página de Entrenamientos
-class TrainingDaysPage extends StatefulWidget {
-  final String blockName;
 
-  const TrainingDaysPage({super.key, required this.blockName});
-
-  @override
-  State<TrainingDaysPage> createState() => _TrainingDaysPageState();
-}
-
-class _TrainingDaysPageState extends State<TrainingDaysPage> {
-  final List<String> trainingDays = [];
-
-  void _createTrainingDay() {
-    String dayName = '';
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Crear Entrenamiento'),
-          content: TextField(
-            onChanged: (value) => dayName = value,
-            decoration: const InputDecoration(hintText: 'Nombre del entrenamiento'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (dayName.isNotEmpty) {
-                  setState(() => trainingDays.add(dayName));
-                }
-                Navigator.pop(context);
-              },
-              child: const Text('Guardar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _navigateToExercises(String dayName) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ExercisePage(dayName: dayName),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.blockName),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _createTrainingDay,
-          ),
-        ],
-      ),
-      body: trainingDays.isEmpty
-          ? const Center(
-              child: Text(
-                'Presiona + para crear un entrenamiento',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-            )
-          : ListView.builder(
-              itemCount: trainingDays.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: const EdgeInsets.all(12),
-                  child: ListTile(
-                    title: Text(trainingDays[index]),
-                    subtitle: const Text('0 Ejercicios · Sin fecha'),
-                    onTap: () => _navigateToExercises(trainingDays[index]),
-                  ),
-                );
-              },
-            ),
-    );
-  }
-}
 
 class ExercisePage extends StatelessWidget {
   final String dayName;
 
   const ExercisePage({super.key, required this.dayName});
 
-  void _navigateToAddExercises(BuildContext context, String dayName) {
+  void navigateToAddExercises(BuildContext context, String dayName) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SelectExercisePage(dayName: '')),
+      MaterialPageRoute(builder: (context) => const SelectExercisePage(dayName: '')),
     );
   }
 
@@ -138,7 +52,7 @@ class ExercisePage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => _navigateToAddExercises(context, dayName)
+            onPressed: () => navigateToAddExercises(context, dayName)
             )
         ],
       ),
@@ -150,6 +64,7 @@ class ExercisePage extends StatelessWidget {
       ),
     );
   }
+
 }
 
 class SelectExercisePage extends StatefulWidget {

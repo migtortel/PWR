@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
-
-import 'main.dart';
+import 'training_page.dart';
 
 class TrainingBlocksPage extends StatefulWidget {
-  const TrainingBlocksPage({Key? key}) : super(key: key);
+  const TrainingBlocksPage({super.key});
 
   @override
-  State<TrainingBlocksPage> createState() => _TrainingBlocksPageState();
+  State<TrainingBlocksPage> createState() => TrainingBlocksPageState();
 }
 
-class _TrainingBlocksPageState extends State<TrainingBlocksPage> {
+class TrainingBlocksPageState extends State<TrainingBlocksPage> {
   final List<String> trainingBlocks = [];
 
-  void _createBlock() {
+  void createBlock() {
     String blockName = '';
     showDialog(
       context: context,
@@ -47,7 +46,7 @@ class _TrainingBlocksPageState extends State<TrainingBlocksPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: _createBlock,
+            onPressed: createBlock,
           ),
         ],
       ),
