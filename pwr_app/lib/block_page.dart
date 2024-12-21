@@ -63,7 +63,7 @@ class TrainingBlocksPageState extends State<TrainingBlocksPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => TrainingDaysPage(blockName: trainingBlocks[index]),
+                          builder: (context) => TrainingDaysPage(blockName: trainingBlocks[index], selectedExercises: [],),
                         ),
                       );
                     },

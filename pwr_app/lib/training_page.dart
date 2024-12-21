@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'main.dart';
+import 'exercise_page.dart';
+
 
 class TrainingDaysPage extends StatefulWidget {
   final String blockName;
-  const TrainingDaysPage({super.key, required this.blockName});
+  const TrainingDaysPage({
+    super.key,
+    required this.blockName,
+  });
 
   @override
   State<TrainingDaysPage> createState() => TrainingDaysPageState();
@@ -11,6 +15,7 @@ class TrainingDaysPage extends StatefulWidget {
 
 class TrainingDaysPageState extends State<TrainingDaysPage> {
   final List<String> trainingDays = [];
+  final List<String> selectedExercises = [];
 
   void createTrainingDay() {
     String dayName = '';
@@ -55,8 +60,8 @@ class TrainingDaysPageState extends State<TrainingDaysPage> {
           ),
         ],
       ),
-      body: trainingDays.isEmpty
-          ? const Center(
+      body: trainingDays.isEmpty? 
+          const Center(
               child: Text(
                 'Presiona + para crear un entrenamiento',
                 style: TextStyle(fontSize: 16, color: Colors.grey),
@@ -69,8 +74,8 @@ class TrainingDaysPageState extends State<TrainingDaysPage> {
                   margin: const EdgeInsets.all(12),
                   child: ListTile(
                     title: Text(trainingDays[index]),
-                    subtitle: const Text('0 Ejercicios · Sin fecha'),
-                    onTap: () => navigateToExercises(trainingDays[index]),
+                    subtitle: Text('(Aqui se muestran el numero de) Ejercicios - Sin fecha'),
+                    onTap: () => navigateToExercises(widget.blockName, trainingDays[index]),
                   ),
                 );
               },
@@ -78,11 +83,12 @@ class TrainingDaysPageState extends State<TrainingDaysPage> {
     );
   }
 
-  void navigateToExercises(String dayName) {
+  void navigateToExercises(String blockName, String dayName) {
+    // Navega a la página de ejercicios y espera los ejercicios seleccionados
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ExercisePage(dayName: dayName),
+        builder: (context) => ExercisePage(blockName: blockName, dayName: dayName),
       ),
     );
   }
