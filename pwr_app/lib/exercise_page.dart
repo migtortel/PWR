@@ -91,7 +91,7 @@ class SelectExercisePageState extends State<SelectExercisePage> {
     'Core',
   ];
 
-  final List<String> exercises = [
+  List<String> exercises = [
     'Remo en máquina',
     'Hyperextensiones',
     'Prensa de piernas Platz',
@@ -120,6 +120,12 @@ class SelectExercisePageState extends State<SelectExercisePage> {
               style: TextStyle(color: Colors.white),
             ),
           ),
+          TextButton(
+            onPressed: addExerciseToList, 
+            child: const Text(
+              'Añadir ejercicio a la lista',
+              style: TextStyle(color: Colors.white),)
+          )
         ],
       ),
       body: Column(
@@ -212,5 +218,36 @@ class SelectExercisePageState extends State<SelectExercisePage> {
     // Retorna la lista de ejercicios seleccionados a ExercisePage
     Navigator.pop(context, selectedExercises);
   }
+
+  void addExerciseToList() {
+    String name = '';
+    showDialog(
+      context: context, 
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Añadir ejercicio'),
+          content: TextField(
+            onChanged: (value) => name = value,
+            decoration: const InputDecoration(hintText: 'Nombre del ejercicio'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (!exercises.contains(name)) {
+                  setState(() => exercises.add(name));
+                }
+                Navigator.pop(context);
+              },
+              child: const Text('Guardar'),
+            ),
+          ],
+          );
+        
+  });
 }
 
+}
