@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pwr_app/detail_exercise_page.dart';
 
 class ExercisePage extends StatefulWidget {
   final String blockName;
@@ -60,9 +61,8 @@ class _ExercisePageState extends State<ExercisePage> {
                   margin: const EdgeInsets.all(12),
                   child: ListTile(
                     title: Text(selectedExercises[index]),
-                    onTap: () => {} // Aqui se navega a la pagina intra ejercicio, 
-                                    //donde se muestran las series, reps, etc,
-                  ),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ExerciseDetailsPage(exerciseName: selectedExercises[index]))
+                  )),
                 );
               },
             ),
@@ -220,14 +220,14 @@ class SelectExercisePageState extends State<SelectExercisePage> {
   }
 
   void addExerciseToList() {
-    String name = '';
+    String exerciseName = '';
     showDialog(
       context: context, 
       builder: (context) {
         return AlertDialog(
           title: Text('Añadir ejercicio'),
           content: TextField(
-            onChanged: (value) => name = value,
+            onChanged: (value) => exerciseName = value,
             decoration: const InputDecoration(hintText: 'Nombre del ejercicio'),
           ),
           actions: [
@@ -237,8 +237,8 @@ class SelectExercisePageState extends State<SelectExercisePage> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (!exercises.contains(name)) {
-                  setState(() => exercises.add(name));
+                if (!exercises.contains(exerciseName)) {
+                  setState(() => exercises.add(exerciseName));
                 }
                 Navigator.pop(context);
               },
