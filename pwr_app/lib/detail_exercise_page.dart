@@ -11,11 +11,6 @@ class ExerciseDetailsPage extends StatefulWidget {
 
 class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   int selectedTabIndex = 0;
-  double reps = 0;
-  double rpe = 0;
-  double weight = 0;
-
-  //String formattedNumber = number % 1 == 0 ? number.toInt().toString() : number.toString();
 
   List<List<double>> objetivoData = [
     [0, 0, 0]
@@ -66,7 +61,7 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
           setState(() {data[rowIndex][colIndex] = double.tryParse(value) ?? 0;});
         },
         decoration: InputDecoration(
-          hintText: '${data[rowIndex][colIndex]} $unit',
+          hintText: '${formattedNumber(data[rowIndex][colIndex])} $unit',
           filled: true,
           fillColor: Colors.grey[900],
           border: OutlineInputBorder(
