@@ -74,7 +74,7 @@ class TrainingDaysPageState extends State<TrainingDaysPage> {
                   margin: const EdgeInsets.all(12),
                   child: ListTile(
                     title: Text(trainingDays[index]),
-                    subtitle: Text('(Aqui se muestran el numero de) Ejercicios - Sin fecha'),
+                    subtitle: const Text('(Aqui se muestran el numero de) Ejercicios - Sin fecha'),
                     onTap: () => navigateToExercises(widget.blockName, trainingDays[index]),
                   ),
                 );

@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() => runApp(const PersonalTrainingApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const PersonalTrainingApp());
+}
 class PersonalTrainingApp extends StatelessWidget {
   const PersonalTrainingApp({super.key});
 
@@ -14,5 +22,6 @@ class PersonalTrainingApp extends StatelessWidget {
       home: LoginPage(),
     );
   }
+  
 }
 

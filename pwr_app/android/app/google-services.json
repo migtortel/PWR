@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "343859319893",
+    "project_id": "pwrappdb",
+    "storage_bucket": "pwrappdb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:343859319893:android:e97a55f0aaac9cffbd30dc",
+        "android_client_info": {
+          "package_name": "com.example.pwr_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZBdMC5Y2R0U9ORVl6kmIxX-r10Kvom88"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
