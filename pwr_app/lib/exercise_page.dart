@@ -225,7 +225,7 @@ class SelectExercisePageState extends State<SelectExercisePage> {
       context: context, 
       builder: (context) {
         return AlertDialog(
-          title: Text('Añadir ejercicio'),
+          title: const Text('Añadir ejercicio'),
           content: TextField(
             onChanged: (value) => exerciseName = value,
             decoration: const InputDecoration(hintText: 'Nombre del ejercicio'),

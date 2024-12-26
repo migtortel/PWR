@@ -19,7 +19,7 @@ class PersonalTrainingApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'PWR Training',
       theme: ThemeData.dark(),
-      home: LoginPage(),
+      home: LoginPage(), 
     );
   }
   
