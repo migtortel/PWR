@@ -3,8 +3,9 @@ import 'trainings.dart';
 class Block {
   Map<String, List<Trainings>> blocks; // Mapa de bloques con lista de entrenamientos
 
-  // Constructor
-  Block({required this.blocks});
+  // Constructor para inicializar el mapa de bloques
+  Block({required String name, required List<Trainings> training})
+      : blocks = {name: training};
 
   // Método para agregar un bloque nuevo
   void addBlock(String blockName) {

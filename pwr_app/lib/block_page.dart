@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:pwr_app/objects/blocks.dart';
+import 'package:pwr_app/objects/exercise.dart';
+import 'package:pwr_app/objects/exercise_details.dart';
+import 'package:pwr_app/objects/trainings.dart';
 import 'training_page.dart';
-
+import 'objects/blocks.dart';
 class TrainingBlocksPage extends StatefulWidget {
   const TrainingBlocksPage({super.key});
 
@@ -10,7 +14,11 @@ class TrainingBlocksPage extends StatefulWidget {
 
 class TrainingBlocksPageState extends State<TrainingBlocksPage> {
   final List<String> trainingBlocks = [];
-
+  ExerciseList exerciseList = ExerciseList(exerciseSet: []);
+  late Exercise exercises = Exercise(nombre: "", sets: exerciseList);
+  late Trainings training = Trainings(trainings: {});
+  late List<Trainings> trainingsList = [];
+  late Block blocks = Block(name: '', training: trainingsList);
   void createBlock() {
     String blockName = '';
     showDialog(

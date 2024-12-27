@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'objects/exercise.dart';
+import 'objects/exercise_details.dart';
 
 class ExerciseDetailsPage extends StatefulWidget {
   final String exerciseName;
@@ -13,10 +12,7 @@ class ExerciseDetailsPage extends StatefulWidget {
 
 class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   int selectedTabIndex = 0;
-  
   ExerciseList objetivoData = ExerciseList(exerciseSet: [[0,0,0]]);
-  // Primer set: [peso, reps, rpe]];
-
   ExerciseList realData = ExerciseList(exerciseSet: [[0,0,0]]);
 
   String formattedNumber(double number) {
@@ -26,7 +22,7 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   void addRow() {
     setState(() {
       if (selectedTabIndex == 0) {
-        objetivoData.addSet(0, 0, 0); // Añade un nuevo set
+        objetivoData.addSet(0, 0, 0); 
       } else {
         realData.addSet(0, 0, 0);
       }
