@@ -1,37 +1,41 @@
-class ExerciseList {
-  List<List<double>> exerciseSet; // Cada sublista representará [peso, reps, rpe]
+import 'exercise_details.dart';
+
+class Exercise {
+  String nombre; // Nombre del ejercicio
+  ExerciseList sets; // Conjunto de sets representado por ExerciseList
 
   // Constructor
-  ExerciseList({required this.exerciseSet});
+  Exercise({
+    required this.nombre,
+    required this.sets,
+  });
 
-  // Método para añadir un nuevo set
+  // Método para agregar un nuevo set
   void addSet(double peso, double reps, double rpe) {
-    exerciseSet.add([peso, reps, rpe]);
+    sets.exerciseSet.add([peso, reps, rpe]);
   }
 
-  // Método para actualizar un set existente
-  void updateSet(int index, double peso, double reps, double rpe) {
-    if (index >= 0 && index < exerciseSet.length) {
-      exerciseSet[index] = [peso, reps, rpe];
-    } else {
-      throw Exception("Índice fuera de rango");
-    }
-  }
-
-  // Método para eliminar un set
+  // Método para eliminar un set por índice
   void removeSet(int index) {
-    if (index >= 0 && index < exerciseSet.length) {
-      exerciseSet.removeAt(index);
+    if (index >= 0 && index < sets.exerciseSet.length) {
+      sets.exerciseSet.removeAt(index);
     } else {
       throw Exception("Índice fuera de rango");
     }
   }
 
-  get length => exerciseSet.length;
+  // Método para actualizar un set por índice
+  void updateSet(int index, double peso, double reps, double rpe) {
+    if (index >= 0 && index < sets.exerciseSet.length) {
+      sets.exerciseSet[index] = [peso, reps, rpe];
+    } else {
+      throw Exception("Índice fuera de rango");
+    }
+  }
 
-  // Representación del objeto como texto
+  // Representación en texto
   @override
   String toString() {
-    return 'Exercise(sets: $exerciseSet)';
+    return 'Ejercicio(nombre: $nombre, sets: ${sets.exerciseSet})';
   }
 }
