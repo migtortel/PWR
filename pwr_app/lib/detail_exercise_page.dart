@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'objects/exercise.dart';
+
 class ExerciseDetailsPage extends StatefulWidget {
   final String exerciseName;
 
@@ -11,14 +13,11 @@ class ExerciseDetailsPage extends StatefulWidget {
 
 class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   int selectedTabIndex = 0;
+  
+  ExerciseList objetivoData = ExerciseList(exerciseSet: [[0,0,0]]);
+  // Primer set: [peso, reps, rpe]];
 
-  List<List<double>> objetivoData = [
-    [0, 0, 0]
-  ]; // Primer set: [peso, reps, rpe]];
-
-  List<List<double>> realData = [
-    [0, 0, 0]
-  ];
+  ExerciseList realData = ExerciseList(exerciseSet: [[0,0,0]]);
 
   String formattedNumber(double number) {
     return number % 1 == 0 ? number.toInt().toString() : number.toString();
@@ -27,14 +26,14 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   void addRow() {
     setState(() {
       if (selectedTabIndex == 0) {
-        objetivoData.add([0, 0, 0]); // Añade un nuevo set
+        objetivoData.addSet(0, 0, 0); // Añade un nuevo set
       } else {
-        realData.add([0, 0, 0]);
+        realData.addSet(0, 0, 0);
       }
     });
   }
 
-  Widget buildTable(List<List<double>> data) {
+  Widget buildTable(ExerciseList data) {
     return ListView.builder(
       itemCount: data.length,
       itemBuilder: (context, index) {
@@ -51,17 +50,17 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   }
 
   Widget buildEditableCell(
-      List<List<double>> data, int rowIndex, int colIndex, String unit) {
+      ExerciseList data, int rowIndex, int colIndex, String unit) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: SizedBox(
       width: 150,
       child: TextField(
         onChanged: (value) {
-          setState(() {data[rowIndex][colIndex] = double.tryParse(value) ?? 0;});
+          setState(() {data.exerciseSet[rowIndex][colIndex] = double.tryParse(value) ?? 0;});
         },
         decoration: InputDecoration(
-          hintText: '${formattedNumber(data[rowIndex][colIndex])} $unit',
+          hintText: '${formattedNumber(data.exerciseSet[rowIndex][colIndex])} $unit',
           filled: true,
           fillColor: Colors.grey[900],
           border: OutlineInputBorder(
