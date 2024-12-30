@@ -61,7 +61,8 @@ class _ExercisePageState extends State<ExercisePage> {
                   margin: const EdgeInsets.all(12),
                   child: ListTile(
                     title: Text(selectedExercises[index]),
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ExerciseDetailsPage(exerciseName: selectedExercises[index]))
+                    onTap: () => Navigator.push(context, 
+                      MaterialPageRoute(builder: (context) => ExerciseDetailsPage(exerciseName: selectedExercises[index], dayName: widget.dayName, blockName: widget.blockName)),
                   )),
                 );
               },

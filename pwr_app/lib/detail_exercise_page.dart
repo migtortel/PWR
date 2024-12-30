@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart';
+import 'objects/exercise.dart';
+import 'objects/trainings.dart';
+import 'objects/blocks.dart';
 import 'objects/exercise_details.dart';
 
 class ExerciseDetailsPage extends StatefulWidget {
   final String exerciseName;
+  final String dayName;
+  final String blockName;
 
-  const ExerciseDetailsPage({super.key, required this.exerciseName});
+  const ExerciseDetailsPage({super.key, required this.exerciseName, 
+    required this.dayName, required this.blockName});
 
   @override
-  State<ExerciseDetailsPage> createState() => _ExerciseDetailsPageState();
+  State<ExerciseDetailsPage> createState() => ExerciseDetailsPageState();
 }
 
-class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
+class ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   int selectedTabIndex = 0;
   ExerciseList objetivoData = ExerciseList(exerciseSet: [[0,0,0]]);
   ExerciseList realData = ExerciseList(exerciseSet: [[0,0,0]]);
+  late Exercise exercise = Exercise(nombre: exerciseName, sets: objetivoData);
+  late Trainings trainings = Trainings(trainings: {dayName: exercise});
+  List<Trainings> trainingsList = [];
+  late Block block = Block(name: blockName, training: trainingsList);
 
+  get exerciseName => widget.exerciseName;
+  get dayName => widget.dayName;
+  get blockName => widget.blockName;
   String formattedNumber(double number) {
     return number % 1 == 0 ? number.toInt().toString() : number.toString();
   }
