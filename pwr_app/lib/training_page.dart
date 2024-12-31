@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'objects/exercise.dart';
-import 'objects/exercise_details.dart';
-import 'objects/trainings.dart';
 import 'exercise_page.dart';
 
 
@@ -19,7 +16,6 @@ class TrainingDaysPage extends StatefulWidget {
 class TrainingDaysPageState extends State<TrainingDaysPage> {
   final List<String> trainingDays = [];
   final List<String> selectedExercises = [];
-  Trainings trainings = Trainings(trainings: {});
 
   void createTrainingDay() {
     String dayName = '';
@@ -41,7 +37,6 @@ class TrainingDaysPageState extends State<TrainingDaysPage> {
               onPressed: () {
                 if (dayName.isNotEmpty) {
                   setState(() => trainingDays.add(dayName));
-                  //trainings.addTraining(dayName, )
                 }
                 Navigator.pop(context);
               },
