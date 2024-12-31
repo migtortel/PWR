@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:pwr_app/objects/blocks.dart';
 import 'package:pwr_app/objects/trainings.dart';
 import 'training_page.dart';
+
 class TrainingBlocksPage extends StatefulWidget {
-  const TrainingBlocksPage({super.key});
+  final String userId;
+  const TrainingBlocksPage({super.key, required this.userId});
 
   @override
   State<TrainingBlocksPage> createState() => TrainingBlocksPageState();
@@ -12,7 +13,7 @@ class TrainingBlocksPage extends StatefulWidget {
 class TrainingBlocksPageState extends State<TrainingBlocksPage> {
   final List<String> trainingBlocks = [];
   late List<Trainings> trainingsList = [];
-  late Block block = Block(name: '', training: trainingsList);
+
 
   
   void createBlock() {
@@ -31,7 +32,6 @@ class TrainingBlocksPageState extends State<TrainingBlocksPage> {
               onPressed: () {
                 if (blockName.isNotEmpty) {
                   setState(() => trainingBlocks.add(blockName));
-                  Block block = Block(name: blockName, training: trainingsList);  //Se añade a la BBDD
                 }
                 Navigator.pop(context);
               },

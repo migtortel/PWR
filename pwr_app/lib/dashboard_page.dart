@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'block_page.dart';
 import 'calendar_page.dart';
 import 'stats_page.dart';
@@ -14,11 +14,21 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
-    const StatisticsPage(),
-    const TrainingBlocksPage(),
-    const CalendarPage(),
-  ];
+  final String userId = FirebaseAuth.instance.currentUser!.uid; // Obtener el UID del usuario autenticado
+
+  final List<Widget> pages = []; // Lista de páginas que se inicializará más adelante
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Inicializar las páginas con el UID del usuario
+    pages.addAll([
+      StatisticsPage(userId: userId), // Pasar el UID al constructor
+      TrainingBlocksPage(userId: userId),
+      CalendarPage(userId: userId),
+    ]);
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -32,7 +42,7 @@ class _DashboardPageState extends State<DashboardPage> {
       appBar: AppBar(
         title: const Text('PWR Training'),
       ),
-      body: _pages[_selectedIndex],
+      body: pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.bar_chart), label: 'Estadísticas'),

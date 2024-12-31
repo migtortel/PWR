@@ -1,56 +1,62 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'trainings.dart';
 
 class Block {
-  Map<String, List<Trainings>> blocks; // Mapa de bloques con lista de entrenamientos
+  final String userId; // UID del usuario autenticado
 
-  // Constructor para inicializar el mapa de bloques
-  Block({required String name, required List<Trainings> training})
-      : blocks = {name: training};
+  Block({required this.userId});
 
-  // Método para agregar un bloque nuevo
-  void addBlock(String blockName) {
-    if (!blocks.containsKey(blockName)) {
-      blocks[blockName] = [];
-    } else {
-      throw Exception("El bloque '$blockName' ya existe.");
-    }
+  // Método para agregar un bloque
+  Future<void> addBlock(String blockName) async {
+    final blockRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('blocks')
+        .doc(blockName);
+
+    await blockRef.set({
+      'name': blockName,
+      'created_at': FieldValue.serverTimestamp(),
+    });
+  }
+
+  // Método para eliminar un bloque
+  Future<void> removeBlock(String blockName) async {
+    final blockRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('blocks')
+        .doc(blockName);
+
+    await blockRef.delete();
   }
 
   // Método para agregar un entrenamiento a un bloque
-  void addTraining(String blockName, Trainings training) {
-    if (blocks.containsKey(blockName)) {
-      blocks[blockName]?.add(training);
-    } else {
-      throw Exception("El bloque '$blockName' no existe.");
-    }
+  Future<void> addTraining(String blockName, Trainings training) async {
+    final trainingRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('blocks')
+        .doc(blockName)
+        .collection('trainings')
+        .doc(training.name);
+
+    await trainingRef.set(training.toMap());
   }
 
-  // Método para eliminar un bloque completo
-  void removeBlock(String blockName) {
-    if (blocks.containsKey(blockName)) {
-      blocks.remove(blockName);
-    } else {
-      throw Exception("El bloque '$blockName' no existe.");
-    }
-  }
+  // Método para obtener entrenamientos de un bloque
+  Future<List<Trainings>> getTrainings(String blockName) async {
+    final trainingsSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('blocks')
+        .doc(blockName)
+        .collection('trainings')
+        .get();
 
-  // Método para eliminar un entrenamiento de un bloque
-  void removeTraining(String blockName, Trainings training) {
-    if (blocks.containsKey(blockName)) {
-      blocks[blockName]?.remove(training);
-    } else {
-      throw Exception("El bloque '$blockName' no existe.");
-    }
-  }
-
-  // Obtener una lista de entrenamientos en un bloque
-  List<Trainings>? getTrainings(String blockName) {
-    return blocks[blockName];
-  }
-
-  // Representación en texto
-  @override
-  String toString() {
-    return 'Blocks: ${blocks.keys.toList()}';
+    return trainingsSnapshot.docs
+        .map((doc) => Trainings.fromMap(doc.data()))
+        .toList();
   }
 }
+

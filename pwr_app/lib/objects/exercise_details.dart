@@ -27,11 +27,26 @@ class ExerciseList {
     }
   }
 
-  get length => exerciseSet.length;
+  // Método para convertir a Map para Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'sets': exerciseSet.map((set) => set).toList(),
+    };
+  }
+
+  // Método para crear un objeto desde un Map recuperado de Firestore
+  factory ExerciseList.fromMap(Map<String, dynamic> map) {
+    return ExerciseList(
+      exerciseSet: (map['sets'] as List<dynamic>)
+          .map((set) => List<double>.from(set as List<dynamic>))
+          .toList(),
+    );
+  }
 
   // Representación del objeto como texto
   @override
   String toString() {
-    return 'Exercise(sets: $exerciseSet)';
+    return 'ExerciseList(sets: $exerciseSet)';
   }
 }
+

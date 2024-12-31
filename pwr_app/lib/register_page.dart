@@ -1,40 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dashboard_page.dart';
-import 'register_page.dart';
 
-class LoginPage extends StatelessWidget {
-  final TextEditingController _usernameController = TextEditingController();
+class RegisterPage extends StatelessWidget {
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  LoginPage({super.key});
+  RegisterPage({super.key});
 
-  // Método para iniciar sesión
-  Future<void> _login(BuildContext context) async {
-    final email = _usernameController.text.trim();
+  Future<void> _register(BuildContext context) async {
+    final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      _showErrorDialog(context, 'Por favor, ingresa tu correo y contraseña.');
+      _showErrorDialog(context, 'Por favor, ingresa un correo y una contraseña.');
       return;
     }
 
     try {
-      // Autenticación con Firebase
-      UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
-
-      // Redirigir al dashboard si el inicio de sesión es exitoso
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardPage()),
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
       );
+      Navigator.pop(context); // Regresar a la página de inicio de sesión
     } catch (e) {
-      _showErrorDialog(context, 'Error en el inicio de sesión: ${e.toString()}');
+      _showErrorDialog(context, 'Error al registrarse: ${e.toString()}');
     }
   }
 
-  // Método para mostrar un cuadro de diálogo de error
   void _showErrorDialog(BuildContext context, String message) {
     showDialog(
       context: context,
@@ -56,14 +48,14 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
+      appBar: AppBar(title: const Text('Registro')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
-              controller: _usernameController,
+              controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
             ),
             const SizedBox(height: 16),
@@ -74,17 +66,8 @@ class LoginPage extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             ElevatedButton(
-              onPressed: () => _login(context),
-              child: const Text('Login'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => RegisterPage()),
-                );
-              },
-              child: const Text('¿No tienes cuenta? Regístrate aquí'),
+              onPressed: () => _register(context),
+              child: const Text('Registrarse'),
             ),
           ],
         ),

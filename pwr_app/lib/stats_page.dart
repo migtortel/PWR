@@ -2,7 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class StatisticsPage extends StatelessWidget {
-  const StatisticsPage({super.key});
+  final String userId;
+  const StatisticsPage({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {

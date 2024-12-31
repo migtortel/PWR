@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class CalendarPage extends StatefulWidget {
-  const CalendarPage({super.key});
+  final String userId;
+  const CalendarPage({super.key, required this.userId});
 
   @override
   State<CalendarPage> createState() => _CalendarPageState();

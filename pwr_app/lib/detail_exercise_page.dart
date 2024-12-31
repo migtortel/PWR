@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'objects/exercise.dart';
-import 'objects/trainings.dart';
-import 'objects/blocks.dart';
 import 'objects/exercise_details.dart';
 
 class ExerciseDetailsPage extends StatefulWidget {
@@ -20,10 +17,6 @@ class ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   int selectedTabIndex = 0;
   ExerciseList objetivoData = ExerciseList(exerciseSet: [[0,0,0]]);
   ExerciseList realData = ExerciseList(exerciseSet: [[0,0,0]]);
-  late Exercise exercise = Exercise(nombre: exerciseName, sets: objetivoData);
-  late Trainings trainings = Trainings(trainings: {dayName: exercise});
-  List<Trainings> trainingsList = [];
-  late Block block = Block(name: blockName, training: trainingsList);
 
   get exerciseName => widget.exerciseName;
   get dayName => widget.dayName;
@@ -44,7 +37,7 @@ class ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
 
   Widget buildTable(ExerciseList data) {
     return ListView.builder(
-      itemCount: data.length,
+      itemCount: data.exerciseSet.length,
       itemBuilder: (context, index) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
