@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'exercise_page.dart';
-
 
 class TrainingDaysPage extends StatefulWidget {
   final String blockName;
+  final String userId; // ID del usuario autenticado
+
   const TrainingDaysPage({
     super.key,
     required this.blockName,
+    required this.userId,
   });
 
   @override
@@ -14,9 +17,21 @@ class TrainingDaysPage extends StatefulWidget {
 }
 
 class TrainingDaysPageState extends State<TrainingDaysPage> {
-  final List<String> trainingDays = [];
-  final List<String> selectedExercises = [];
+  late final CollectionReference trainingsCollection;
 
+  @override
+  void initState() {
+    super.initState();
+    // Referencia a la subcolección trainings dentro del bloque
+    trainingsCollection = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('blocks')
+        .doc(widget.blockName)
+        .collection('trainings');
+  }
+
+  // Método para crear un nuevo entrenamiento
   void createTrainingDay() {
     String dayName = '';
     showDialog(
@@ -26,7 +41,8 @@ class TrainingDaysPageState extends State<TrainingDaysPage> {
           title: const Text('Crear Entrenamiento'),
           content: TextField(
             onChanged: (value) => dayName = value,
-            decoration: const InputDecoration(hintText: 'Nombre del entrenamiento'),
+            decoration:
+                const InputDecoration(hintText: 'Nombre del entrenamiento'),
           ),
           actions: [
             TextButton(
@@ -34,11 +50,15 @@ class TrainingDaysPageState extends State<TrainingDaysPage> {
               child: const Text('Cancelar'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (dayName.isNotEmpty) {
-                  setState(() => trainingDays.add(dayName));
+                  // Guardar el entrenamiento en Firestore
+                  await trainingsCollection.doc(dayName).set({
+                    'name': dayName,
+                    'created_at': FieldValue.serverTimestamp(),
+                  });
+                  Navigator.pop(context);
                 }
-                Navigator.pop(context);
               },
               child: const Text('Guardar'),
             ),
@@ -60,35 +80,48 @@ class TrainingDaysPageState extends State<TrainingDaysPage> {
           ),
         ],
       ),
-      body: trainingDays.isEmpty? 
-          const Center(
+      body: StreamBuilder<QuerySnapshot>(
+        stream: trainingsCollection.snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(
               child: Text(
                 'Presiona + para crear un entrenamiento',
                 style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
-            )
-          : ListView.builder(
-              itemCount: trainingDays.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: const EdgeInsets.all(12),
-                  child: ListTile(
-                    title: Text(trainingDays[index]),
-                    subtitle: const Text('(Aqui se muestran el numero de) Ejercicios - Sin fecha'),
-                    onTap: () => navigateToExercises(widget.blockName, trainingDays[index]),
-                  ),
-                );
-              },
-            ),
+            );
+          }
+
+          final trainings = snapshot.data!.docs;
+
+          return ListView.builder(
+            itemCount: trainings.length,
+            itemBuilder: (context, index) {
+              final training = trainings[index];
+              return Card(
+                margin: const EdgeInsets.all(12),
+                child: ListTile(
+                  title: Text(training['name']),
+                  subtitle: const Text('(Aquí se muestran el número de) Ejercicios - Sin fecha'),
+                  onTap: () => navigateToExercises(widget.blockName, training['name'], widget.userId),
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
-  void navigateToExercises(String blockName, String dayName) {
-    // Navega a la página de ejercicios y espera los ejercicios seleccionados
+  void navigateToExercises(String blockName, String dayName, String userId) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ExercisePage(blockName: blockName, dayName: dayName),
+        builder: (context) =>
+            ExercisePage(blockName: blockName, dayName: dayName, userId: userId),
       ),
     );
   }

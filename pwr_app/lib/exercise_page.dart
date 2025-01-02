@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pwr_app/detail_exercise_page.dart';
 
 class ExercisePage extends StatefulWidget {
   final String blockName;
   final String dayName;
+  final String userId;
 
   const ExercisePage({
     super.key,
     required this.dayName,
     required this.blockName,
+    required this.userId,
   });
 
   @override
@@ -16,22 +19,42 @@ class ExercisePage extends StatefulWidget {
 }
 
 class _ExercisePageState extends State<ExercisePage> {
-  List<String> selectedExercises = []; // Lista de ejercicios seleccionados
+  late final CollectionReference exercisesCollection;
 
-  void navigateToAddExercises(BuildContext context, String dayName) async {
-    // Navegar a SelectExercisePage y esperar la lista de ejercicios seleccionados
+  @override
+  void initState() {
+    super.initState();
+    // Referencia a la subcolección exercises dentro del entrenamiento
+    exercisesCollection = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('blocks')
+        .doc(widget.blockName)
+        .collection('trainings')
+        .doc(widget.dayName)
+        .collection('exercises');
+  }
+
+  // Método para navegar a la página de selección de ejercicios
+  void navigateToAddExercises(BuildContext context) async {
     final result = await Navigator.push<List<String>>(
       context,
       MaterialPageRoute(
-        builder: (context) => SelectExercisePage(dayName: dayName),
+        builder: (context) => SelectExercisePage(
+          dayName: widget.dayName,
+          exercisesCollection: exercisesCollection,
+        ),
       ),
     );
 
-    // Si se retorna una lista válida, actualiza selectedExercises
-    if (result != null) {
-      setState(() {
-        selectedExercises = result;
-      });
+    // Sincronizar con Firestore si se seleccionaron ejercicios
+    if (result != null && result.isNotEmpty) {
+      for (final exercise in result) {
+        await exercisesCollection.doc(exercise).set({
+          'name': exercise,
+          'created_at': FieldValue.serverTimestamp(),
+        });
+      }
     }
   }
 
@@ -43,39 +66,65 @@ class _ExercisePageState extends State<ExercisePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => navigateToAddExercises(context, widget.dayName),
+            onPressed: () => navigateToAddExercises(context),
           ),
         ],
       ),
-      body: selectedExercises.isEmpty
-          ? const Center(
+      body: StreamBuilder<QuerySnapshot>(
+        stream: exercisesCollection.snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(
               child: Text(
                 'Presiona + para crear ejercicios',
                 style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
-            )
-          : ListView.builder(
-              itemCount: selectedExercises.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: const EdgeInsets.all(12),
-                  child: ListTile(
-                    title: Text(selectedExercises[index]),
-                    onTap: () => Navigator.push(context, 
-                      MaterialPageRoute(builder: (context) => ExerciseDetailsPage(exerciseName: selectedExercises[index], dayName: widget.dayName, blockName: widget.blockName)),
-                  )),
-                );
-              },
-            ),
+            );
+          }
+
+          final exercises = snapshot.data!.docs;
+
+          return ListView.builder(
+            itemCount: exercises.length,
+            itemBuilder: (context, index) {
+              final exercise = exercises[index];
+              return Card(
+                margin: const EdgeInsets.all(12),
+                child: ListTile(
+                  title: Text(exercise['name']),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ExerciseDetailsPage(
+                        exerciseName: exercise['name'],
+                        dayName: widget.dayName,
+                        blockName: widget.blockName,
+                        userId: widget.userId,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
 
-
 class SelectExercisePage extends StatefulWidget {
-  final String dayName; // Nombre del entrenamiento
+  final String dayName;
+  final CollectionReference exercisesCollection;
 
-  const SelectExercisePage({super.key, required this.dayName});
+  const SelectExercisePage({
+    super.key,
+    required this.dayName,
+    required this.exercisesCollection,
+  });
 
   @override
   State<SelectExercisePage> createState() => SelectExercisePageState();
@@ -112,21 +161,22 @@ class SelectExercisePageState extends State<SelectExercisePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.dayName), // Muestra el nombre del entrenamiento
+        title: Text(widget.dayName),
         actions: [
           TextButton(
-            onPressed: saveExercises, // Guardar los ejercicios seleccionados
+            onPressed: saveExercises,
             child: const Text(
               'Guardar',
               style: TextStyle(color: Colors.white),
             ),
           ),
           TextButton(
-            onPressed: addExerciseToList, 
+            onPressed: addExerciseToList,
             child: const Text(
               'Añadir ejercicio a la lista',
-              style: TextStyle(color: Colors.white),)
-          )
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
         ],
       ),
       body: Column(
@@ -171,15 +221,15 @@ class SelectExercisePageState extends State<SelectExercisePage> {
               itemBuilder: (context, index) {
                 final exercise = exercises[index];
                 return Card(
-                    margin: const EdgeInsets.all(1),
-                    child: ListTile(
-                      title: Text(exercises[index]),
-                      onTap: () => addExercise(exercise),
-                    ));
+                  margin: const EdgeInsets.all(1),
+                  child: ListTile(
+                    title: Text(exercise),
+                    onTap: () => addExercise(exercise),
+                  ),
+                );
               },
             ),
-          ),
-          // Mostrar ejercicios seleccionados temporalmente
+          ),// Mostrar ejercicios seleccionados temporalmente
           if (selectedExercises.isNotEmpty)
             Expanded(
               child: ListView.builder(
@@ -208,7 +258,7 @@ class SelectExercisePageState extends State<SelectExercisePage> {
       }
     });
   }
-
+  
   void removeExercise(String exercise) {
     setState(() {
       selectedExercises.remove(exercise);
@@ -216,14 +266,13 @@ class SelectExercisePageState extends State<SelectExercisePage> {
   }
 
   void saveExercises() {
-    // Retorna la lista de ejercicios seleccionados a ExercisePage
     Navigator.pop(context, selectedExercises);
   }
 
   void addExerciseToList() {
     String exerciseName = '';
     showDialog(
-      context: context, 
+      context: context,
       builder: (context) {
         return AlertDialog(
           title: const Text('Añadir ejercicio'),
@@ -246,9 +295,8 @@ class SelectExercisePageState extends State<SelectExercisePage> {
               child: const Text('Guardar'),
             ),
           ],
-          );
-        
-  });
-}
-
+        );
+      },
+    );
+  }
 }

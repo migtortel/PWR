@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pwr_app/objects/trainings.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'training_page.dart';
 
 class TrainingBlocksPage extends StatefulWidget {
-  final String userId;
+  final String userId; // ID del usuario autenticado
   const TrainingBlocksPage({super.key, required this.userId});
 
   @override
@@ -11,11 +11,19 @@ class TrainingBlocksPage extends StatefulWidget {
 }
 
 class TrainingBlocksPageState extends State<TrainingBlocksPage> {
-  final List<String> trainingBlocks = [];
-  late List<Trainings> trainingsList = [];
+  late final CollectionReference blocksCollection;
 
+  @override
+  void initState() {
+    super.initState();
+    // Referencia a la colección de bloques para el usuario autenticado
+    blocksCollection = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('blocks');
+  }
 
-  
+  // Método para crear un nuevo bloque
   void createBlock() {
     String blockName = '';
     showDialog(
@@ -29,11 +37,15 @@ class TrainingBlocksPageState extends State<TrainingBlocksPage> {
           ),
           actions: [
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (blockName.isNotEmpty) {
-                  setState(() => trainingBlocks.add(blockName));
+                  // Guardar el bloque en Firestore
+                  await blocksCollection.doc(blockName).set({
+                    'name': blockName,
+                    'created_at': FieldValue.serverTimestamp(),
+                  });
+                  Navigator.pop(context);
                 }
-                Navigator.pop(context);
               },
               child: const Text('Guardar'),
             ),
@@ -55,27 +67,43 @@ class TrainingBlocksPageState extends State<TrainingBlocksPage> {
           ),
         ],
       ),
-      body: trainingBlocks.isEmpty
-          ? const Center(child: Text('Presiona + para crear un bloque', style: TextStyle(color: Colors.grey)))
-          : ListView.builder(
-              itemCount: trainingBlocks.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  child: ListTile(
-                    title: Text(trainingBlocks[index]),
-                    subtitle: const Text('0 Entrenamientos'),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TrainingDaysPage(blockName: trainingBlocks[index]),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: blocksCollection.snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(
+              child: Text('Presiona + para crear un bloque',
+                  style: TextStyle(color: Colors.grey)),
+            );
+          }
+
+          final blocks = snapshot.data!.docs;
+
+          return ListView.builder(
+            itemCount: blocks.length,
+            itemBuilder: (context, index) {
+              final block = blocks[index];
+              return Card(
+                child: ListTile(
+                  title: Text(block['name']),
+                  subtitle: const Text('0 Entrenamientos'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TrainingDaysPage(blockName: block['name'], userId: widget.userId),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
