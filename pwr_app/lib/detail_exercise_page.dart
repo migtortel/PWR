@@ -17,20 +17,22 @@ class ExerciseDetailsPage extends StatefulWidget {
   });
 
   @override
-  State<ExerciseDetailsPage> createState() => ExerciseDetailsPageState();
+  State<ExerciseDetailsPage> createState() => _ExerciseDetailsPageState();
 }
 
-class ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
+class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   int selectedTabIndex = 0;
-  late final DocumentReference exerciseDoc;
+  late final CollectionReference exerciseDetailsCollection;
+
   ExerciseList objetivoData = ExerciseList(exerciseSet: []);
   ExerciseList realData = ExerciseList(exerciseSet: []);
+
+  final TextEditingController notesController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // Referencia al documento del ejercicio en Firestore
-    exerciseDoc = FirebaseFirestore.instance
+    exerciseDetailsCollection = FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
         .collection('blocks')
@@ -38,36 +40,87 @@ class ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
         .collection('trainings')
         .doc(widget.dayName)
         .collection('exercises')
-        .doc(widget.exerciseName);
+        .doc(widget.exerciseName)
+        .collection('details');
 
-    // Cargar los datos iniciales desde Firestore
-    loadExerciseData();
+    loadExerciseDetails();
+    loadNotes();
   }
 
-  Future<void> loadExerciseData() async {
-    final snapshot = await exerciseDoc.get();
-    if (snapshot.exists) {
-      final data = snapshot.data() as Map<String, dynamic>;
+  Future<void> loadExerciseDetails() async {
+    final snapshot = await exerciseDetailsCollection.get();
+    if (snapshot.docs.isNotEmpty) {
       setState(() {
         objetivoData = ExerciseList(
-          exerciseSet: List<List<double>>.from(data['objetivo']?.map((e) => List<double>.from(e)) ?? []),
+          exerciseSet: snapshot.docs
+              .where((doc) => doc['type'] == 'objetivo')
+              .map((doc) => List<double>.from(doc['set']))
+              .toList(),
         );
         realData = ExerciseList(
-          exerciseSet: List<List<double>>.from(data['real']?.map((e) => List<double>.from(e)) ?? []),
+          exerciseSet: snapshot.docs
+              .where((doc) => doc['type'] == 'real')
+              .map((doc) => List<double>.from(doc['set']))
+              .toList(),
         );
       });
     }
   }
 
-  Future<void> saveExerciseData() async {
-    await exerciseDoc.set({
-      'objetivo': objetivoData.exerciseSet.map((e) => e.toList()).toList(),
-      'real': realData.exerciseSet.map((e) => e.toList()).toList(),
-    }, SetOptions(merge: true));
+  Future<void> loadNotes() async {
+    final docSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('blocks')
+        .doc(widget.blockName)
+        .collection('trainings')
+        .doc(widget.dayName)
+        .collection('exercises')
+        .doc(widget.exerciseName)
+        .get();
+
+    if (docSnapshot.exists) {
+      final data = docSnapshot.data() as Map<String, dynamic>;
+      if (data.containsKey('notes')) {
+        notesController.text = data['notes'];
+      }
+    }
   }
 
-  String formattedNumber(double number) {
-    return number % 1 == 0 ? number.toInt().toString() : number.toString();
+  Future<void> saveNotes(String notes) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('blocks')
+        .doc(widget.blockName)
+        .collection('trainings')
+        .doc(widget.dayName)
+        .collection('exercises')
+        .doc(widget.exerciseName)
+        .set({'notes': notes}, SetOptions(merge: true));
+  }
+
+  Future<void> saveExerciseDetail(String type, List<double> set) async {
+    await exerciseDetailsCollection.add({
+      'type': type,
+      'set': set,
+    });
+  }
+
+  Future<void> saveAllDetails() async {
+    await exerciseDetailsCollection.get().then((snapshot) {
+      for (var doc in snapshot.docs) {
+        doc.reference.delete();
+      }
+    });
+
+    for (var set in objetivoData.exerciseSet) {
+      await saveExerciseDetail('objetivo', set);
+    }
+
+    for (var set in realData.exerciseSet) {
+      await saveExerciseDetail('real', set);
+    }
   }
 
   void addRow() {
@@ -78,19 +131,19 @@ class ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
         realData.addSet(0, 0, 0);
       }
     });
-    saveExerciseData(); // Guardar cambios en Firestore
+    saveAllDetails();
   }
 
-  Widget buildTable(ExerciseList data) {
+  Widget buildTable(ExerciseList data, String type) {
     return ListView.builder(
       itemCount: data.exerciseSet.length,
       itemBuilder: (context, index) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            buildEditableCell(data, index, 0, 'kg'),
-            buildEditableCell(data, index, 1, ''),
-            buildEditableCell(data, index, 2, ''),
+            buildEditableCell(data, index, 0, 'kg', type),
+            buildEditableCell(data, index, 1, '', type),
+            buildEditableCell(data, index, 2, '', type),
           ],
         );
       },
@@ -98,7 +151,7 @@ class ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   }
 
   Widget buildEditableCell(
-      ExerciseList data, int rowIndex, int colIndex, String unit) {
+      ExerciseList data, int rowIndex, int colIndex, String unit, String type) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: SizedBox(
@@ -109,7 +162,7 @@ class ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
               data.exerciseSet[rowIndex][colIndex] =
                   double.tryParse(value) ?? 0;
             });
-            saveExerciseData(); // Guardar cambios en Firestore
+            saveAllDetails();
           },
           decoration: InputDecoration(
             hintText:
@@ -127,6 +180,10 @@ class ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
         ),
       ),
     );
+  }
+
+  String formattedNumber(double number) {
+    return number % 1 == 0 ? number.toInt().toString() : number.toString();
   }
 
   @override
@@ -153,8 +210,8 @@ class ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
             Expanded(
               child: TabBarView(
                 children: [
-                  buildTable(objetivoData),
-                  buildTable(realData),
+                  buildTable(objetivoData, 'objetivo'),
+                  buildTable(realData, 'real'),
                 ],
               ),
             ),
@@ -171,21 +228,21 @@ class ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
                 child: const Icon(Icons.add, color: Colors.black),
               ),
             ),
-            const Divider(height: 2),
-            const Padding(
-              padding: EdgeInsets.all(12.0),
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Estadísticas',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Row(
+                  const SizedBox(height: 8),
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text('E1RM: 0 kg', style: TextStyle(color: Colors.white)),
@@ -196,11 +253,14 @@ class ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
                 ],
               ),
             ),
-            const Divider(height: 2),
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: TextField(
+                controller:
+                    notesController, // Controlador para manejar el texto
                 maxLines: 3,
+                onChanged: (value) => saveNotes(
+                    value), // Guardar las notas en Firestore al cambiar
                 decoration: InputDecoration(
                   hintText: 'Notas del ejercicio',
                   hintStyle: const TextStyle(color: Colors.grey),

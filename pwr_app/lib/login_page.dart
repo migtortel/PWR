@@ -21,8 +21,7 @@ class LoginPage extends StatelessWidget {
 
     try {
       // Autenticación con Firebase
-      UserCredential userCredential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+      await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
 
       // Redirigir al dashboard si el inicio de sesión es exitoso
       Navigator.pushReplacement(

@@ -103,10 +103,17 @@ class TrainingDaysPageState extends State<TrainingDaysPage> {
               final training = trainings[index];
               return Card(
                 margin: const EdgeInsets.all(12),
-                child: ListTile(
-                  title: Text(training['name']),
-                  subtitle: const Text('(Aquí se muestran el número de) Ejercicios - Sin fecha'),
-                  onTap: () => navigateToExercises(widget.blockName, training['name'], widget.userId),
+                child: FutureBuilder<int>(
+                  future: _getExerciseCount(training.id),
+                  builder: (context, exerciseCountSnapshot) {
+                    final exerciseCount = exerciseCountSnapshot.data ?? 0;
+                    return ListTile(
+                      title: Text(training['name']),
+                      subtitle: Text('$exerciseCount Ejercicios - Sin fecha'),
+                      onTap: () => navigateToExercises(
+                          widget.blockName, training['name'], widget.userId),
+                    );
+                  },
                 ),
               );
             },
@@ -114,6 +121,12 @@ class TrainingDaysPageState extends State<TrainingDaysPage> {
         },
       ),
     );
+  }
+  
+  Future<int> _getExerciseCount(String trainingId) async {
+    final exercisesCollection = trainingsCollection.doc(trainingId).collection('exercises');
+    final snapshot = await exercisesCollection.get();
+    return snapshot.size;
   }
 
   void navigateToExercises(String blockName, String dayName, String userId) {
