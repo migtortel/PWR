@@ -87,15 +87,25 @@ class TrainingBlocksPageState extends State<TrainingBlocksPage> {
             itemBuilder: (context, index) {
               final block = blocks[index];
               return Card(
-                child: ListTile(
-                  title: Text(block['name']),
-                  subtitle: const Text('0 Entrenamientos'),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TrainingDaysPage(blockName: block['name'], userId: widget.userId),
-                      ),
+                margin: const EdgeInsets.all(12),
+                child: FutureBuilder<int>(
+                  future: getTrainingCount(block.id),
+                  builder: (context, trainingCountSnapshot) {
+                    final trainingCount = trainingCountSnapshot.data ?? 0;
+                    return ListTile(
+                      title: Text(block['name']),
+                      subtitle: Text('$trainingCount Entrenamientos'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TrainingDaysPage(
+                              blockName: block['name'],
+                              userId: widget.userId,
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
@@ -105,5 +115,16 @@ class TrainingBlocksPageState extends State<TrainingBlocksPage> {
         },
       ),
     );
+  }
+
+  Future<int> getTrainingCount(String blockId) async {
+    final trainingsCollection = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('blocks')
+        .doc(blockId)
+        .collection('trainings');
+    final snapshot = await trainingsCollection.get();
+    return snapshot.size;
   }
 }

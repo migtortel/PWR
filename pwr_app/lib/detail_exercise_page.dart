@@ -135,23 +135,73 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
   }
 
   Widget buildTable(ExerciseList data, String type) {
-    return ListView.builder(
-      itemCount: data.exerciseSet.length,
-      itemBuilder: (context, index) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            buildEditableCell(data, index, 0, 'kg', type),
-            buildEditableCell(data, index, 1, '', type),
-            buildEditableCell(data, index, 2, '', type),
-          ],
-        );
-      },
-    );
-  }
+  return Column(
+    children: [
+      // Encabezados de las columnas
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          SizedBox(
+            width: 150,
+            child: Center(
+              child: Text(
+                'Peso',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 150,
+            child: Center(
+              child: Text(
+                'Reps',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 150,
+            child: Center(
+              child: Text(
+                'RPE',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 8), // Espaciado entre encabezado y contenido
+      Expanded(
+        child: ListView.builder(
+          itemCount: data.exerciseSet.length,
+          itemBuilder: (context, index) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                buildEditableCell(data, index, 0, type),
+                buildEditableCell(data, index, 1, type),
+                buildEditableCell(data, index, 2, type),
+              ],
+            );
+          },
+        ),
+      ),
+    ],
+  );
+}
+
 
   Widget buildEditableCell(
-      ExerciseList data, int rowIndex, int colIndex, String unit, String type) {
+      ExerciseList data, int rowIndex, int colIndex, String type) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: SizedBox(
@@ -165,8 +215,7 @@ class _ExerciseDetailsPageState extends State<ExerciseDetailsPage> {
             saveAllDetails();
           },
           decoration: InputDecoration(
-            hintText:
-                '${formattedNumber(data.exerciseSet[rowIndex][colIndex])} $unit',
+            hintText:(data.exerciseSet[rowIndex][colIndex]).toString(),
             filled: true,
             fillColor: Colors.grey[900],
             border: OutlineInputBorder(
